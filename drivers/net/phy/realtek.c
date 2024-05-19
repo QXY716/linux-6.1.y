@@ -80,6 +80,7 @@
 
 #define RTL_GENERIC_PHYID			0x001cc800
 #define RTL_8211FVD_PHYID			0x001cc878
+#define RTL_8221B_VB_CG_PHYID			0x001cc849
 
 MODULE_DESCRIPTION("Realtek PHY driver");
 MODULE_AUTHOR("Johnson Leung");
@@ -783,7 +784,7 @@ static int rtl8221b_vb_cg_match_phy_device(struct phy_device *phydev)
 		id |= val;
 	}
 
-	return (id == 0x001cc849);
+	return (id == RTL_8221B_VB_CG_PHYID);
 }
 
 static int rtl822x_probe(struct phy_device *phydev)
