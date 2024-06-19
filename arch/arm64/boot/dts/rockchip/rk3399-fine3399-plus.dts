@@ -139,7 +139,7 @@
 	backlight: backlight {
 		compatible = "pwm-backlight";
 		brightness-levels = <0 36 72 108 144 180 216 255>;
-		default-brightness-level = <144>;
+		default-brightness-level = <5>;
 		pwms = <&pwm0 0 1000000 0>;
 	};
 
