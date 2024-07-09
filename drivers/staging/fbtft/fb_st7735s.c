@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
- * FB driver for the ST7789V LCD Controller
+ * FB driver for the ST7735S LCD Controller
  *
  * Copyright (C) 2015 Dennis Menschel
  */
@@ -18,7 +18,7 @@
 
 #include "fbtft.h"
 
-#define DRVNAME "fb_st7789v"
+#define DRVNAME "fb_st7735s"
 
 #define DEFAULT_GAMMA \
     "70 2C 2E 15 10 09 48 33 53 0B 19 18 20 25\n" \
@@ -31,7 +31,7 @@
 #define HSD20_IPS 1
 
 /**
- * enum st7789v_command - ST7789V display controller commands
+ * enum st7735s_command - ST7735S display controller commands
  *
  * @PORCTRL: porch setting
  * @GCTRL: gate control
@@ -47,12 +47,12 @@
  * The command names are the same as those found in the datasheet to ease
  * looking up their semantics and usage.
  *
- * Note that the ST7789V display controller offers quite a few more commands
+ * Note that the ST7735S display controller offers quite a few more commands
  * which have been omitted from this list as they are not used at the moment.
  * Furthermore, commands that are compliant with the MIPI DCS have been left
  * out as well to avoid duplicate entries.
  */
-enum st7789v_command {
+enum st7735s_command {
     PORCTRL = 0xB2,
     GCTRL = 0xB7,
     VCOMS = 0xBB,
@@ -98,29 +98,36 @@ static irqreturn_t panel_te_handler(int irq, void *data)
  */
 static int init_display(struct fbtft_par *par)
 {
-	par->fbtftops.reset(par);
-	mdelay(50);
-	write_reg(par, 0x36, 0x00);
-	write_reg(par, 0x3A, 0x05);
-	write_reg(par, 0xB2, 0x0C, 0x0C, 0x00, 0x33, 0x33);
-	write_reg(par, 0xB7, 0x35);
-	write_reg(par, 0xBB, 0x19);
-	write_reg(par, 0xC0, 0x2C);
-	write_reg(par, 0xC2, 0x01);
-	write_reg(par, 0xC3, 0x12);
-	write_reg(par, 0xC4, 0x20);
-	write_reg(par, 0xC6, 0x0F);
-	write_reg(par, 0xD0, 0xA4, 0xA1);
-	write_reg(par, 0xE0, 0xD0, 0x04, 0x0D, 0x11, 0x13, 0x2B, 0x3F, 0x54,
-		  0x4C, 0x18, 0x0D, 0x0B, 0x1F, 0x23);
-	write_reg(par, 0xE1, 0xD0, 0x04, 0x0C, 0x11, 0x13, 0x2C, 0x3F, 0x44,
-		  0x51, 0x2F, 0x1F, 0x1F, 0x20, 0x23);
-	write_reg(par, 0x21);
-	write_reg(par, 0x11);
-	mdelay(50);
-	write_reg(par, 0x29);
-	mdelay(200);
-	return 0;
+    par->fbtftops.reset(par);
+    mdelay(100);
+    write_reg(par,0x11); //软复位
+    mdelay(120);
+    //下面添加初始化函数write_reg 参数分别为：结构体指针，写命令，写数据....(后都为数据)
+    //ST7735s Frame Rate
+    write_reg(par,0xB1,0x05,0x3C,0x3C); //Normal mode
+    write_reg(par,0xB2,0x05,0x3C,0x3C); //Idle mode
+    write_reg(par,0xB3,0x05,0x3C,0x3C,0x05,0x3C,0x3C); //Partial mode
+    write_reg(par,0xB4,0x03); //Column inversion
+    //ST7735s Power Sequence
+    write_reg(par,0xC0,0xAB,0x0B,0x04); //AVDD GVDD
+    write_reg(par,0xC1,0xC5); //VGH VGL C0
+    write_reg(par,0xC2,0x0D,0x00); //Normal Mode
+    write_reg(par,0xC3,0x8D,0x6A); //Idle
+    write_reg(par,0xC4,0x8D,0xEE); //MX, MY, RGB mode
+    write_reg(par,0xC5,0x0F); //VCOM
+    //ST7735s Gamma Sequence
+    write_reg(par,0xE0,0x07,0x0E,0x08,0x07,0x10,0x07,0x02,0x07,0x09,0x0F,0x25,0x36,0x00,0x08,0x04,0x10); //positive gamma
+    write_reg(par,0xE1,0x0A,0x0D,0x08,0x07,0x0F,0x07,0x02,0x07,0x09,0x0F,0x25,0x35,0x00,0x09,0x04,0x10); //negative gamma
+    write_reg(par,0xFC,0x80);
+    write_reg(par,0x3A,0x05); //65k mode
+    write_reg(par,0x36,0x08);
+    //write_reg(par, 0x21); //Display inversion
+    write_reg(par,0x29); //Display on
+    write_reg(par,0x2A,0x00,0x1A,0x00,0x69); //Set Column Address
+    write_reg(par,0x2B,0x00,0x01,0x00,0xA0); //Set Page Address
+    write_reg(par,0x2C);
+
+    return 0;
 }
 
 
@@ -277,13 +284,13 @@ static void set_addr_win(struct fbtft_par *par, int xs, int ys, int xe, int ye)
 {
 	switch(par->info->var.rotate)
 	{
-		case   0: xs += 52; xe += 52; ys += 40; ye += 40;
+		case   0: xs += 24; xe += 24;
 				 break;
-		case  90: xs += 40; xe += 40; ys +=52 ; ye += 52;
+		case  90: ys += 24; ye += 24;
 				 break;
-		case 180: xs += 52; xe += 52; ys +=40 ; ye += 40;
+		case 180: xs += 24; xe += 24;
 				 break;
-		case 270: xs += 40; xe += 40; ys +=52 ; ye += 52;
+		case 270: ys += 24; ye += 24;
 				 break;
 		default :
 				 break;
@@ -302,19 +309,19 @@ static void reset(struct fbtft_par *par)
 {
     if (!par->gpio.reset)
         return;
+    fbtft_par_dbg(DEBUG_RESET, par, "%s()\n", __func__);
     gpiod_set_value_cansleep(par->gpio.reset, 1);
     msleep(10);
     gpiod_set_value_cansleep(par->gpio.reset, 0);
     msleep(200);
     gpiod_set_value_cansleep(par->gpio.reset, 1);
     msleep(10);
-    gpiod_set_value_cansleep(par->gpio.cs, 1);  /* Activate chip */
 }
 
 static struct fbtft_display display = {
     .regwidth = 8,
-    .width = 135,
-    .height = 240,
+    .width = 80,
+    .height = 160,
     .gamma_num = 2,
     .gamma_len = 14,
     .gamma = HSD20_IPS_GAMMA,
@@ -329,13 +336,13 @@ static struct fbtft_display display = {
     },
 };
 
-FBTFT_REGISTER_DRIVER(DRVNAME, "sitronix,st7789v", &display);
+FBTFT_REGISTER_DRIVER(DRVNAME, "sitronix,st7735s", &display);
 
 MODULE_ALIAS("spi:" DRVNAME);
 MODULE_ALIAS("platform:" DRVNAME);
-MODULE_ALIAS("spi:st7789v");
-MODULE_ALIAS("platform:st7789v");
+MODULE_ALIAS("spi:st7735s");
+MODULE_ALIAS("platform:st7735s");
 
-MODULE_DESCRIPTION("FB driver for the ST7789V LCD Controller");
+MODULE_DESCRIPTION("FB driver for the ST7735S LCD Controller");
 MODULE_AUTHOR("Dennis Menschel");
 MODULE_LICENSE("GPL");
