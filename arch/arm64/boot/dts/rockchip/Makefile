@@ -78,6 +78,7 @@ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-sapphire.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-sapphire-excavator.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-tb-ls3399.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-tn3399-v3.dtb
+dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-tpm312.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-tvi3315a.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-xiaobao.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-zcube1-max.dtb
@@ -107,6 +108,7 @@ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3568-photonicat.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3568-radxa-e25.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3568-rock-3a.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3568-seewo-sv21.dtb
+dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3568-swan1-w28.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3568-watermelon-pi.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3568-watermelon-pi-v3.dtb
 
