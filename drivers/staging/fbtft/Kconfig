@@ -166,7 +166,10 @@ config FB_TFT_ST7735S
 	depends on FB_TFT
 	help
 	  This enables generic framebuffer support for the Sitronix ST7735S
-	  display controller.
+	  display controller. The controller is intended for small color
+	  The ST7735S controller is suitable for small color displays with a resolution of 160x80 pixels.
+
+	  Say Y if you have such a display that utilizes this controller.
 
 config FB_TFT_ST7789V
 	tristate "FB driver for the ST7789V LCD Controller"
