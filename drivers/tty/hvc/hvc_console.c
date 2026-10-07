@@ -496,7 +496,7 @@ static int hvc_push(struct hvc_struct *hp)
 	return n;
 }
 
-static int hvc_write(struct tty_struct *tty, const unsigned char *buf, int count)
+static int hvc_write(struct tty_struct *tty, const u8 *buf, int count)
 {
 	struct hvc_struct *hp = tty->driver_data;
 	unsigned long flags;
@@ -543,10 +543,10 @@ static int hvc_write(struct tty_struct *tty, const unsigned char *buf, int count
 	}
 
 	/*
-	 * Racy, but harmless, kick thread if there is still pending data.
+	 * Kick thread to flush if there's still pending data
+	 * or to wakeup the write queue.
 	 */
-	if (hp->n_outbuf)
-		hvc_kick();
+	hvc_kick();
 
 	return written;
 }
